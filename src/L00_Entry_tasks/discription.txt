@@ -1,0 +1,3 @@
+Neural Networks Course
+
+The skill test contest for "Neural networks for application in scientific research" for aspiratnts. Passing the test is required to be enrolled in the course.
