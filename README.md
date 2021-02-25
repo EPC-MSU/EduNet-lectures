@@ -1,5 +1,7 @@
 # EduNet-lectures
+
 Репозиторий с лекциями и изображениями к ним
+
 MSU neural networks course for scientists
 
 #### Требования к структуре репозитория и сервера:
