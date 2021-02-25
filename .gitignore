@@ -1,0 +1,8 @@
+*.idea
+*.vs
+*.ipynb
+*.ipynb_checkpoints
+*__pycache__
+*runs
+sample_data
+*add_content.py
