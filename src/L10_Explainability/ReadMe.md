@@ -6,3 +6,5 @@
 Ноутбук в папке [personal](https://github.com/EPC-MSU/EduNet-lectures/tree/main/src/L10_Explainability/personal)
 
 Картинки в папке [pictures](https://github.com/EPC-MSU/EduNet-lectures/tree/main/src/L10_Explainability/pictures)
+
+Кое какие статьи в папке [articles](https://github.com/EPC-MSU/EduNet-lectures/tree/main/src/L10_Explainability/articles)
