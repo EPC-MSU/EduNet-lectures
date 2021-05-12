@@ -122,13 +122,16 @@ MODE = "all_ipynb"
 ### If MODE == "all_ipynb", specify:
 root = "out"
 
+OVERWRITE = True
+# If OVERWRITE == False, script doesn't change original ipynb and save copy with suffix '_clear.ipynb' instead.
+
 if __name__ == "__main__":
     ctr = Counter()
     if MODE == "one_ipynb":
         lecture_pathname = "out//L13_GAN_cGAN//L13_GAN_cGAN.ipynb"
         print(lecture_pathname)
         ctr.reset()
-        process_one_lecture(lecture_pathname, overwrite=True)
+        process_one_lecture(lecture_pathname, overwrite=OVERWRITE)
         ctr.summary()
     if MODE == "all_ipynb":
         for path, subdirs, files in os.walk(root):
@@ -140,5 +143,5 @@ if __name__ == "__main__":
 
                     print(lecture_pathname)
                     ctr.reset()
-                    process_one_lecture(lecture_pathname, overwrite=True)
+                    process_one_lecture(lecture_pathname, overwrite=OVERWRITE)
                     ctr.summary()
