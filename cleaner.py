@@ -71,7 +71,7 @@ def process_one_lecture(pathname, overwrite=False):
     with open(pathname, "r") as inp:
         js = json.load(inp)
 
-    new_js = {key: value for key, value in js.items() if key != "cells"}
+    new_js = dict()
     new_js["cells"] = list()
     total_i = len(js['cells'])
 
@@ -88,8 +88,11 @@ def process_one_lecture(pathname, overwrite=False):
 
         new_js["cells"].append(newcell)
 
-    with open(clear_notebook_patch, "w") as out:
-        json.dump(new_js, out, indent=1)
+    old_global_meta = {key: value for key, value in js.items() if key != "cells"}
+    new_js.update(old_global_meta)
+    with open(clear_notebook_patch, "w", encoding='utf8') as out:
+        json.dump(new_js, out, indent=1, ensure_ascii=False)
+        out.write('\n')
 
 
 class Counter(dict):
@@ -122,5 +125,5 @@ if __name__ == "__main__":
 
                 print(lecture_pathname)
                 ctr.reset()
-                process_one_lecture(lecture_pathname, overwrite=False)
+                process_one_lecture(lecture_pathname, overwrite=True)
                 ctr.summary()
