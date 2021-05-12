@@ -60,10 +60,13 @@ def fix_markdown_cell(cell, i, total_i, path=""):
     return cell
 
 
-def process_one_lecture(pathname):
+def process_one_lecture(pathname, overwrite=False):
     lecture_path = os.path.dirname(pathname)
     notebook_name = os.path.basename(pathname)
-    clear_notebook_patch = os.path.join(lecture_path, notebook_name.split(".")[0] + "_clear.ipynb")
+    if overwrite:
+        clear_notebook_patch = pathname
+    else:
+        clear_notebook_patch = os.path.join(lecture_path, notebook_name.split(".")[0] + "_clear.ipynb")
 
     with open(pathname, "r") as inp:
         js = json.load(inp)
@@ -119,5 +122,5 @@ if __name__ == "__main__":
 
                 print(lecture_pathname)
                 ctr.reset()
-                process_one_lecture(lecture_pathname)
+                process_one_lecture(lecture_pathname, overwrite=False)
                 ctr.summary()
