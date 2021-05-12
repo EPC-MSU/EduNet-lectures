@@ -103,27 +103,42 @@ class Counter(dict):
         self["attachments"] = 0
 
     def summary(self):
-        print("\tLecture summary:")
-        print(f"\tMetadata fixes: {self['metadata']}")
-        print(f"\tOutputs fixes: {self['outputs']}")
-        print(f"\tExecution fixes: {self['execution_count']}")
-        print(f"\tAttachments fixes: {self['attachments']}")
+        if sum(list(self.values())) == 0:
+            print("\tMy congratulations, notebook is perfect!")
+        else:
+            print(f"\tMetadata fixes: {self['metadata']}")
+            print(f"\tOutputs fixes: {self['outputs']}")
+            print(f"\tExecution fixes: {self['execution_count']}")
+            print(f"\tAttachments fixes: {self['attachments']}")
 
     def reset(self):
         self.__init__()
 
 
-ctr = Counter()
-if __name__ == "__main__":
-    root = "out"
-    for path, subdirs, files in os.walk(root):
-        for name in files:
-            if name.endswith('.ipynb') and \
-                    not ".ipynb_checkpoints" in path and \
-                    not name.endswith('_clear.ipynb'):
-                lecture_pathname = os.path.join(path, name)
+MODE = "all_ipynb"
+### If mode "one_ipynb", specify:
+# lecture_pathname = "out//L13_GAN_cGAN//L13_GAN_cGAN.ipynb"
 
-                print(lecture_pathname)
-                ctr.reset()
-                process_one_lecture(lecture_pathname, overwrite=True)
-                ctr.summary()
+### If MODE == "all_ipynb", specify:
+root = "out"
+
+if __name__ == "__main__":
+    ctr = Counter()
+    if MODE == "one_ipynb":
+        lecture_pathname = "out//L13_GAN_cGAN//L13_GAN_cGAN.ipynb"
+        print(lecture_pathname)
+        ctr.reset()
+        process_one_lecture(lecture_pathname, overwrite=True)
+        ctr.summary()
+    if MODE == "all_ipynb":
+        for path, subdirs, files in os.walk(root):
+            for name in files:
+                if name.endswith('.ipynb') and \
+                        not ".ipynb_checkpoints" in path and \
+                        not name.endswith('_clear.ipynb'):
+                    lecture_pathname = os.path.join(path, name)
+
+                    print(lecture_pathname)
+                    ctr.reset()
+                    process_one_lecture(lecture_pathname, overwrite=True)
+                    ctr.summary()
