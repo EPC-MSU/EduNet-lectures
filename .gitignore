@@ -6,4 +6,3 @@ out/*/.ipynb_checkpoints
 *__pycache__
 *runs
 sample_data
-out/*/add_content.py
