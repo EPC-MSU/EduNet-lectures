@@ -6,3 +6,4 @@ out/*/.ipynb_checkpoints
 *__pycache__
 *runs
 sample_data
+*_backup.ipynb
