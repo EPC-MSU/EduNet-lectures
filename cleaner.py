@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import base64
 
 
@@ -15,19 +16,43 @@ def is_raw(cell):
     return cell['cell_type'] == 'raw'
 
 
-def save_file(path, name, data):
+def save_file(filepath, filename, data):
     if len(data) == 1:
         for meme, base64str in data.items():
-            with open(os.path.join(path, name), "wb") as f:
+            with open(os.path.join(filepath, filename), "wb") as f:
                 f.write(base64.b64decode(base64str))
-                print(f"Saved: {name}")
+                print(f"\t[SAVED: {filename}]")
     else:
-        print(f"Failed to save: {name}")
+        print(f"\t[Failed to save: {filename}]")
 
 
-def save_attachments(path, attachments):
-    for name, data in attachments.items():
-        save_file(path, name, data)
+def save_attachments(lect_path, attachments):
+    for att_name, data in attachments.items():
+        name_to_save = f"""img-{ctr["attachments"]}.{os.path.splitext(att_name)[1][1:].strip()}"""
+        save_file(lect_path, name_to_save, data)
+
+
+def check_and_fix_source(cell, lect_path, i, total_i):
+    cell_text = "".join(cell["source"]).replace("\n", "")
+    if "base64" in cell_text:
+        print(f"\t[WARNING][Cell:{i+1}/{total_i}]: Binary data found.")
+        print("\t\t", cell_text[:150].rstrip())
+        ctr["warnings"] += 1
+
+    if "attachments" in cell:
+        print(f"\t[WARNING][Cell:{i+1}/{total_i}]: Markdown attachments found.")
+        cell_text = "".join(cell["source"]).replace("\n", "")
+        print("\t\t", cell_text[:100].rstrip())
+        save_attachments(lect_path, cell["attachments"])
+        del cell["attachments"]
+
+        ctr["attachments"] += 1
+    else:
+        if re.match(r'^.*!\[.*\]\(.*\).*$', cell_text) is not None:
+            print(f"\t[WARNING][Cell:{i+1}/{total_i}]: Probably local link found.")
+            print("\t\t", cell_text[:150].rstrip())
+            ctr["warnings"] += 1
+    return cell
 
 
 def fix_code_cell(cell):
@@ -43,17 +68,7 @@ def fix_code_cell(cell):
     return cell
 
 
-def fix_markdown_cell(cell, i, total_i, path=""):
-    global ctr
-    if "attachments" in cell:
-        print(f"Attachments was found in markdown cell {i}/{total_i}:")
-        save_attachments(path, cell["attachments"])
-        print("=" * 30)
-        cell_text = "".join(cell["source"]).replace("\n\n", "\n")[:100]
-        print(cell_text, "\n", "=" * 30)
-        del cell["attachments"]
-        ctr["attachments"] += 1
-
+def fix_markdown_cell(cell):
     if cell["metadata"] != dict():
         cell["metadata"] = dict()
         ctr["metadata"] += 1
@@ -76,13 +91,14 @@ def process_one_lecture(pathname, overwrite=False):
     total_i = len(js['cells'])
 
     for i, cell in enumerate(js['cells']):
+        cell = check_and_fix_source(cell, lecture_path, i, total_i)
         if is_markdown(cell):
-            newcell = fix_markdown_cell(cell, i, total_i, lecture_path)
+            newcell = fix_markdown_cell(cell)
         elif is_code(cell):
             newcell = fix_code_cell(cell)
         elif is_raw(cell):
             newcell = cell
-            print(f"Raw cell: {i}/{total_i}. Please fix it.")
+            print(f"Raw cell: {i+1}/{total_i}. Please fix it.")
         else:
             raise ValueError(f"Notebook broken. Unknown cell type: {cell['cell_type']}")
 
@@ -101,15 +117,18 @@ class Counter(dict):
         self["outputs"] = 0
         self["execution_count"] = 0
         self["attachments"] = 0
+        self["warnings"] = 0
+        self["n_image"] = 0
 
     def summary(self):
         if sum(list(self.values())) == 0:
             print("\tMy congratulations, notebook is perfect!")
         else:
-            print(f"\tMetadata fixes: {self['metadata']}")
-            print(f"\tOutputs fixes: {self['outputs']}")
-            print(f"\tExecution fixes: {self['execution_count']}")
-            print(f"\tAttachments fixes: {self['attachments']}")
+            if self['warnings'] != 0: print(f"\tWarings: {self['warnings']}")
+            if self['metadata'] != 0: print(f"\tMetadata fixes: {self['metadata']}")
+            if self['outputs'] != 0: print(f"\tOutputs fixes: {self['outputs']}")
+            if self['execution_count'] != 0: print(f"\tExecution counts fixes: {self['execution_count']}")
+            if self['attachments'] != 0: print(f"\tAttachments fixes: {self['attachments']}")
 
     def reset(self):
         self.__init__()
@@ -137,7 +156,7 @@ if __name__ == "__main__":
         for path, subdirs, files in os.walk(root):
             for name in files:
                 if name.endswith('.ipynb') and \
-                        not ".ipynb_checkpoints" in path and \
+                        ".ipynb_checkpoints" not in path and \
                         not name.endswith('_clear.ipynb'):
                     lecture_pathname = os.path.join(path, name)
 
