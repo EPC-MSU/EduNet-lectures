@@ -136,7 +136,7 @@ class Counter(dict):
 
 MODE = "all_ipynb"
 ### If mode "one_ipynb", specify:
-# lecture_pathname = "out//L13_GAN_cGAN//L13_GAN_cGAN.ipynb"
+lecture_pathname = "out//L13_GAN_cGAN//L13_GAN_cGAN.ipynb"
 
 ### If MODE == "all_ipynb", specify:
 root = "out"
@@ -147,7 +147,6 @@ OVERWRITE = True
 if __name__ == "__main__":
     ctr = Counter()
     if MODE == "one_ipynb":
-        lecture_pathname = "out//L13_GAN_cGAN//L13_GAN_cGAN.ipynb"
         print(lecture_pathname)
         ctr.reset()
         process_one_lecture(lecture_pathname, overwrite=OVERWRITE)
