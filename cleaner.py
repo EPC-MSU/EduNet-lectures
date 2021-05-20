@@ -62,6 +62,11 @@ def fix_markdown_cell(cell):
         ctr["metadata"] += 1
     return cell
 
+def fix_global_meta(cell):
+    if cell["metadata"] != dict():
+        cell["metadata"] = dict()
+        ctr["metadata"] += 1
+    return cell
 
 def process_one_lecture(pathname, overwrite=False):
     lecture_path = os.path.dirname(pathname)
@@ -88,13 +93,15 @@ def process_one_lecture(pathname, overwrite=False):
 
         new_js["cells"].append(new_cell)
 
+    old_global_meta = {key: value for key, value in js.items() if key != "cells"}
+    old_global_meta = fix_global_meta(old_global_meta)
+
     if ctr.is_changed():
         save_patch = pathname
         if not overwrite:
             backup_patch = os.path.join(lecture_path, notebook_name.split(".")[-2] + "_backup.ipynb")
             os.replace(pathname, backup_patch)
 
-        old_global_meta = {key: value for key, value in js.items() if key != "cells"}
         new_js.update(old_global_meta)
         with open(save_patch, "w", encoding='utf8') as out:
             json.dump(new_js, out, indent=1, ensure_ascii=False)
