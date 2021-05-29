@@ -7,3 +7,4 @@ out/*/.ipynb_checkpoints
 *runs
 sample_data
 *_backup.ipynb
+*.DS_Store
