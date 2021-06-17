@@ -62,11 +62,6 @@ def fix_markdown_cell(cell):
         ctr["metadata"] += 1
     return cell
 
-def fix_global_meta(cell):
-    if cell["metadata"] != dict():
-        cell["metadata"] = dict()
-        ctr["metadata"] += 1
-    return cell
 
 def process_one_lecture(pathname, overwrite=False):
     lecture_path = os.path.dirname(pathname)
@@ -93,8 +88,8 @@ def process_one_lecture(pathname, overwrite=False):
 
         new_js["cells"].append(new_cell)
 
-    old_global_meta = {key: value for key, value in js.items() if key != "cells"}
-    old_global_meta = fix_global_meta(old_global_meta)
+    old_global_meta = fix_markdown_cell({key: value for key, value in js.items() if key != "cells"})  # Fix global meta
+    new_js.update(old_global_meta)
 
     if ctr.is_changed():
         save_patch = pathname
@@ -102,7 +97,6 @@ def process_one_lecture(pathname, overwrite=False):
             backup_patch = os.path.join(lecture_path, notebook_name.split(".")[-2] + "_backup.ipynb")
             os.replace(pathname, backup_patch)
 
-        new_js.update(old_global_meta)
         with open(save_patch, "w", encoding='utf8') as out:
             json.dump(new_js, out, indent=1, ensure_ascii=False)
             out.write('\n')
@@ -138,24 +132,31 @@ class Counter(dict):
 
 
 def main():
+    nothing_to_fix = True
     if args.filepath is not None:
         lecture_pathname = args.filepath
         print(lecture_pathname)
         ctr.reset()
         process_one_lecture(lecture_pathname, overwrite=args.overwrite)
         ctr.summary()
+        nothing_to_fix = False
+
     else:
-        for path, subdirs, files in os.walk(args.root):
+        for path, subdirs, files in os.walk(args.root if args.root is not None else "."):
             for name in files:
                 if name.endswith('.ipynb') and \
                         ".ipynb_checkpoints" not in path and \
                         not name.endswith('_backup.ipynb'):
                     lecture_pathname = os.path.join(path, name)
-
                     print(lecture_pathname)
                     ctr.reset()
                     process_one_lecture(lecture_pathname, overwrite=args.overwrite)
                     ctr.summary()
+                    nothing_to_fix = False
+            if args.root is None:
+                break
+    if nothing_to_fix is True:
+        print("Nothing to fix (No one lectures in path)")
 
 
 if __name__ == "__main__":
@@ -165,9 +166,10 @@ if __name__ == "__main__":
     parser.add_argument('--disable-warnings', dest='warnings', action='store_false',
                         help="Script disable warnings like 'Probably local link found.'")
     parser.add_argument('--filepath', default=None,
-                        help='Notebook filepath, if not provided, script processed all files in root.')
-    parser.add_argument('--root', default="out",
-                        help="""(default:"out") Processed all file in root folder and all subfolders.""")
+                        help='Notebook filepath, if not provided, script processed all files in root, if root '
+                             'not provided, processed all file in current directory.')
+    parser.add_argument('--root', default=None,
+                        help="""(default:"None") Processed all file in root folder and all subfolders.""")
     parser.set_defaults(overwrite=False)
     parser.set_defaults(warnings=True)
 
