@@ -1,9 +1,14 @@
 .idea
 *.vs
 .ipynb_checkpoints
-src/*.ipynb
-out/*/.ipynb_checkpoints
 *__pycache__
 *runs
+*_backup.ipynb
+*.DS_Store
+src/*.ipynb
+out/*/.ipynb_checkpoints
 sample_data
-out/*/add_content.py
+*.env
+*.venv
+*env
+*venv
