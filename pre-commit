@@ -2,7 +2,7 @@
 
 #==========BLACK MAGIC ==========
 python cleaner.py --root out
-git add .
+git add --update
 #================================
 
 if git rev-parse --verify HEAD >/dev/null 2>&1
