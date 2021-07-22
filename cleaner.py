@@ -67,7 +67,7 @@ def process_one_lecture(pathname, overwrite=False):
     lecture_path = os.path.dirname(pathname)
     notebook_name = os.path.basename(pathname)
 
-    with open(pathname, "r") as inp:
+    with open(pathname, "r", encoding="utf8") as inp:
         js = json.load(inp)
 
     new_js = dict()
