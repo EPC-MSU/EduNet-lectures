@@ -1,2 +1,14 @@
-.icloud
-.DS_Store
+*.icloud
+*.DS_Store
+*.idea
+*.vs
+*.ipynb_checkpoints
+*__pycache__
+*runs
+*_backup.ipynb
+*.env
+*.venv
+*env
+*venv
+out/*/cleaner.py
+src/*/cleaner.py
