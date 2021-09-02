@@ -82,7 +82,7 @@ def process_one_lecture(pathname, overwrite=False):
             new_cell = fix_code_cell(cell)
         elif cell['cell_type'] == 'raw':
             new_cell = cell
-            print(f"Raw cell: {i + 1}/{total_i}. Please fix it.")
+            print(f"\t[WARNING][Cell:{i + 1}/{total_i}]: Raw cell. Please fix cell type.")
         else:
             raise ValueError(f"Notebook broken. Unknown cell type: {cell['cell_type']}")
 
