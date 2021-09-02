@@ -67,7 +67,7 @@ def process_one_lecture(pathname, overwrite=False):
     lecture_path = os.path.dirname(pathname)
     notebook_name = os.path.basename(pathname)
 
-    with open(pathname, "r", encoding="utf8") as inp:
+    with open(pathname, "r", encoding="utf-8") as inp:
         js = json.load(inp)
 
     new_js = dict()
@@ -82,7 +82,7 @@ def process_one_lecture(pathname, overwrite=False):
             new_cell = fix_code_cell(cell)
         elif cell['cell_type'] == 'raw':
             new_cell = cell
-            print(f"Raw cell: {i + 1}/{total_i}. Please fix it.")
+            print(f"\t[WARNING][Cell:{i + 1}/{total_i}]: Raw cell. Please fix cell type.")
         else:
             raise ValueError(f"Notebook broken. Unknown cell type: {cell['cell_type']}")
 
@@ -97,7 +97,7 @@ def process_one_lecture(pathname, overwrite=False):
             backup_patch = os.path.join(lecture_path, notebook_name.split(".")[-2] + "_backup.ipynb")
             os.replace(pathname, backup_patch)
 
-        with open(save_patch, "w", encoding='utf8') as out:
+        with open(save_patch, "w", encoding='utf-8') as out:
             json.dump(new_js, out, indent=1, ensure_ascii=False)
             out.write('\n')
 
