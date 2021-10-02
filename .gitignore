@@ -12,3 +12,4 @@
 *venv
 out/*/cleaner.py
 src/*/cleaner.py
+run_script.bat
