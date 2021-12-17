@@ -39,7 +39,7 @@
 
 ## Лекция 10 “Explainability”
 
-Причины использования Explainability. Обнаружение плохих предсказаний нейросети. Доверие к предсказаниям. Публикации в научных журналах. Explainability & Interpretability. Оценка важности признаков в простых случаях. Оценка важности признака для дерева. Randomization/Permutation. Dropped variable importance. Библиотеки для реализации explanation. SHAP (SHapley Additive exPlanations). LIME. Boruta. Другие библиотеки. Примеры explanations для разных видов данных. Табличные данные. NLP: Пример абстрактного обобщения текста. Изображения. 
+Причины использования Explainability. Обнаружение некорректных зависимостей. Доверие к предсказаниям. Публикации в научных журналах. Explainability & Interpretability. Оценка важности признаков в простых случаях. Оценка важности признака для регрессии. Оценка важности признака для дерева. Randomization/Permutation. Dropped variable importance. Библиотеки для реализации explanation. SHAP (SHapley Additive exPlanations). LIME. Boruta. Другие библиотеки. Примеры explanations для разных видов данных. Табличные данные. NLP: Пример абстрактного обобщения текста. Изображения. 
 
 ## Лекция 11 “Обучение на реальных данных”
 
