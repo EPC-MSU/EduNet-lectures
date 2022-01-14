@@ -63,7 +63,7 @@ def fix_markdown_cell(cell):
     return cell
 
 
-def process_one_lecture(pathname, overwrite=False):
+def process_one_lecture(pathname, backup=False):
     lecture_path = os.path.dirname(pathname)
     notebook_name = os.path.basename(pathname)
 
@@ -93,7 +93,7 @@ def process_one_lecture(pathname, overwrite=False):
 
     if ctr.is_changed():
         save_patch = pathname
-        if not overwrite:
+        if backup:
             backup_patch = os.path.join(lecture_path, notebook_name.split(".")[-2] + "_backup.ipynb")
             os.replace(pathname, backup_patch)
 
@@ -137,7 +137,7 @@ def main():
         lecture_pathname = args.filepath
         print(lecture_pathname)
         ctr.reset()
-        process_one_lecture(lecture_pathname, overwrite=args.overwrite)
+        process_one_lecture(lecture_pathname, backup=args.backup)
         ctr.summary()
         nothing_to_fix = False
 
@@ -150,7 +150,7 @@ def main():
                     lecture_pathname = os.path.join(path, name)
                     print(lecture_pathname)
                     ctr.reset()
-                    process_one_lecture(lecture_pathname, overwrite=args.overwrite)
+                    process_one_lecture(lecture_pathname, backup=args.backup)
                     ctr.summary()
                     nothing_to_fix = False
             if args.root is None:
@@ -161,8 +161,8 @@ def main():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script for cleaning notebooks.')
-    parser.add_argument('--disable-backup', dest='overwrite', action='store_true',
-                        help="If provided, overwrites target notebook, else create a ipynb backup.")
+    parser.add_argument('--backup', dest='backup', action='store_true',
+                        help="If provided, create a ipynb backup.")
     parser.add_argument('--disable-warnings', dest='warnings', action='store_false',
                         help="Script disable warnings like 'Probably local link found.'")
     parser.add_argument('--filepath', default=None,
@@ -170,7 +170,7 @@ if __name__ == "__main__":
                              'not provided, processed all file in current directory.')
     parser.add_argument('--root', default=None,
                         help="""(default:"None") Processed all file in root folder and all subfolders.""")
-    parser.set_defaults(overwrite=False)
+    parser.set_defaults(backup=False)
     parser.set_defaults(warnings=True)
 
     args = parser.parse_args()
