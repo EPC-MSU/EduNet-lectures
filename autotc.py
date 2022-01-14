@@ -50,7 +50,7 @@ def analyze_lecture(fname):
 
 
 def generate_md(lectures, path):
-    f = open(path, "w")
+    f = open(path, "w", encoding="utf-8")
     print("Программа курса\n", file=f)
     i = 1
     for title, headers in lectures.items():
