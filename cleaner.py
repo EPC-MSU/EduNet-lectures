@@ -3,6 +3,7 @@ import re
 import json
 import base64
 import argparse
+import nbformat
 
 
 def save_file(filepath, filename, data):
@@ -61,6 +62,34 @@ def fix_markdown_cell(cell):
         cell["metadata"] = dict()
         ctr["metadata"] += 1
     return cell
+
+
+def _process_one_lecture(pathname, backup=False):
+
+    if backup:
+        backup_patch = os.path.join(os.path.dirname(pathname),
+                                    os.path.basename(pathname).split(".")[-2] + "_backup.ipynb")
+        os.replace(pathname, backup_patch)
+        lect_unchanged = nbformat.read(backup_patch, as_version=nbformat.NO_CONVERT)
+    else:
+        lect_unchanged = nbformat.read(pathname, as_version=nbformat.NO_CONVERT)
+
+    lect_cells = lect_unchanged["cells"]
+    new_cells = []
+    for i, cell in enumerate(lect_cells):  # 167
+        d_to_save = {'cell_type': cell['cell_type'],
+                     'metadata': nbformat.NotebookNode(),
+                     'source': cell['source']}
+        if cell['cell_type'] == 'code':
+            d_to_save['execution_count'] = 0
+            d_to_save['outputs'] = []
+        new_cell = nbformat.from_dict(d_to_save)
+        new_cells.append(new_cell)
+
+    new_nb = lect_unchanged
+    new_nb['cells'] = new_cells
+    nbformat.validate(new_nb)
+    nbformat.write(new_nb, pathname, version=nbformat.NO_CONVERT)
 
 
 def process_one_lecture(pathname, backup=False):
@@ -137,7 +166,7 @@ def main():
         lecture_pathname = args.filepath
         print(lecture_pathname)
         ctr.reset()
-        process_one_lecture(lecture_pathname, backup=args.backup)
+        _process_one_lecture(lecture_pathname, backup=args.backup)
         ctr.summary()
         nothing_to_fix = False
 
@@ -150,7 +179,7 @@ def main():
                     lecture_pathname = os.path.join(path, name)
                     print(lecture_pathname)
                     ctr.reset()
-                    process_one_lecture(lecture_pathname, backup=args.backup)
+                    _process_one_lecture(lecture_pathname, backup=args.backup)
                     ctr.summary()
                     nothing_to_fix = False
             if args.root is None:
