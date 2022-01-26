@@ -64,7 +64,7 @@ def fix_cell(cell, count_cells, i, lecture_path):
                  'metadata': nbformat.NotebookNode(),
                  'source': cell['source']}
     if cell['cell_type'] == 'code':
-        d_to_save['execution_count'] = 0
+        d_to_save['execution_count'] = None
         d_to_save['outputs'] = []
     return nbformat.from_dict(d_to_save)
 
