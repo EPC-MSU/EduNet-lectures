@@ -80,20 +80,21 @@ def fix_cells(cells, lecture_path):
 def process_one_lecture(pathname, backup):
     lecture_path = os.path.dirname(pathname)
     notebook_name = os.path.basename(pathname)
-    if backup:
-        backup_patch = os.path.join(lecture_path, notebook_name.split(".")[-2] + "_backup.ipynb")
-        os.replace(pathname, backup_patch)
-        lect_unchanged = nbformat.read(backup_patch, as_version=nbformat.NO_CONVERT)
-    else:
-        lect_unchanged = nbformat.read(pathname, as_version=nbformat.NO_CONVERT)
+    lect_unchanged = nbformat.read(pathname, as_version=nbformat.NO_CONVERT)
 
     new_cells = fix_cells(lect_unchanged["cells"], lecture_path)
 
     new_nb = lect_unchanged
     new_nb['cells'] = new_cells
     new_nb['metadata'] = nbformat.NotebookNode()
-    nbformat.validate(new_nb)
-    nbformat.write(new_nb, pathname, version=nbformat.NO_CONVERT)
+    if ctr.is_changed():
+        save_path = pathname
+        if backup:
+            # wtf = notebook_name.split(".")[-2]
+            backup_patch = os.path.join(lecture_path, notebook_name.split(".")[-2] + "_backup.ipynb")
+            os.replace(pathname, backup_patch)
+        nbformat.validate(new_nb)
+        nbformat.write(new_nb, save_path, version=nbformat.NO_CONVERT)
 
 
 class Counter(dict):
