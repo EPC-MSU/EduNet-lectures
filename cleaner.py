@@ -1,8 +1,8 @@
 import os
 import re
-import json
 import base64
 import argparse
+
 import nbformat
 
 
@@ -22,117 +22,83 @@ def save_attachments(lect_path, attachments):
         save_file(lect_path, name_to_save, data)
 
 
-def check_and_fix_source(cell, lect_path, i, total_i):
+def check_and_fix_source(cell, lect_path, count_cells, i):
     cell_text = "".join(cell["source"]).replace("\n", "")
-    if "base64" in cell_text and args.warnings:
-        print(f"\t[WARNING][Cell:{i + 1}/{total_i}]: Binary data found.")
-        print("\t\t", cell_text[:150].rstrip())
-        ctr["warnings"] += 1
-
     if "attachments" in cell:
-        print(f"\t[WARNING][Cell:{i + 1}/{total_i}]: Markdown attachments found.")
+        print(f"\t[WARNING][Cell:{i + 1}/{count_cells}]: Markdown attachments found.")
         cell_text = "".join(cell["source"]).replace("\n", "")
         print("\t\t", cell_text[:100].rstrip())
         save_attachments(lect_path, cell["attachments"])
         del cell["attachments"]
         ctr["attachments"] += 1
+    if ";base64," in cell_text and args.warnings:
+        print(f"\t[WARNING][Cell:{i + 1}/{count_cells}]: Binary data found.")
+        print("\t\t", cell_text[:150].rstrip())
+        ctr["warnings"] += 1
     else:
         if re.match(r'^.*!\[.*\]\(.*\).*$', cell_text) is not None and args.warnings:
-            print(f"\t[WARNING][Cell:{i + 1}/{total_i}]: Probably local link found.")
+            print(f"\t[WARNING][Cell:{i + 1}/{count_cells}]: Probably local link found.")
             print("\t\t", cell_text[:150].rstrip())
             ctr["warnings"] += 1
     return cell
 
 
-def fix_code_cell(cell):
-    if cell["execution_count"] is not None:
-        cell["execution_count"] = None
-        ctr["execution_count"] += 1
-    if cell["metadata"] != dict():
-        cell["metadata"] = dict()
+def count_fixes(cell):
+    if 'execution_count' in cell:
+        if cell["execution_count"] is not None:
+            if cell["execution_count"] != 0:
+                ctr["execution_count"] += 1
+    if cell["metadata"] != nbformat.NotebookNode():
         ctr["metadata"] += 1
-    if cell["outputs"] != list():
-        cell["outputs"] = list()
-        ctr["outputs"] += 1
-    return cell
+    if 'outputs' in cell:
+        if cell["outputs"] != list():
+            ctr["outputs"] += 1
+    if cell['cell_type'] == 'raw':
+        print(f"\t[WARNING][Cell:]: Raw cell. Please fix cell type.")  # {i + 1}/{total_i}
 
 
-def fix_markdown_cell(cell):
-    if cell["metadata"] != dict():
-        cell["metadata"] = dict()
-        ctr["metadata"] += 1
-    return cell
+def fix_cell(cell, lecture_path, count_cells, i):
+    cell = check_and_fix_source(cell, lecture_path, count_cells, i)
+    d_to_save = {'cell_type': cell['cell_type'],
+                 'metadata': nbformat.NotebookNode(),
+                 'source': cell['source']}
+    if cell['cell_type'] == 'code':
+        d_to_save['execution_count'] = 0
+        d_to_save['outputs'] = []
+    return nbformat.from_dict(d_to_save)
 
 
-def _process_one_lecture(pathname, backup=False):
+def fix_cells(cells, lecture_path):
+    new_cells = []
+    for i, cell in enumerate(cells):  # 167
+        count_fixes(cell)
+        new_cell = fix_cell(cell, lecture_path, len(cells), i)
+        new_cells.append(new_cell)
+    return new_cells
 
+
+def process_one_lecture(pathname, backup):
+    lecture_path = os.path.dirname(pathname)
+    notebook_name = os.path.basename(pathname)
     if backup:
-        backup_patch = os.path.join(os.path.dirname(pathname),
-                                    os.path.basename(pathname).split(".")[-2] + "_backup.ipynb")
+        backup_patch = os.path.join(lecture_path, notebook_name.split(".")[-2] + "_backup.ipynb")
         os.replace(pathname, backup_patch)
         lect_unchanged = nbformat.read(backup_patch, as_version=nbformat.NO_CONVERT)
     else:
         lect_unchanged = nbformat.read(pathname, as_version=nbformat.NO_CONVERT)
 
-    lect_cells = lect_unchanged["cells"]
-    new_cells = []
-    for i, cell in enumerate(lect_cells):  # 167
-        d_to_save = {'cell_type': cell['cell_type'],
-                     'metadata': nbformat.NotebookNode(),
-                     'source': cell['source']}
-        if cell['cell_type'] == 'code':
-            d_to_save['execution_count'] = 0
-            d_to_save['outputs'] = []
-        new_cell = nbformat.from_dict(d_to_save)
-        new_cells.append(new_cell)
+    new_cells = fix_cells(lect_unchanged["cells"], lecture_path)
 
     new_nb = lect_unchanged
     new_nb['cells'] = new_cells
+    new_nb['metadata'] = nbformat.NotebookNode()
     nbformat.validate(new_nb)
     nbformat.write(new_nb, pathname, version=nbformat.NO_CONVERT)
 
 
-def process_one_lecture(pathname, backup=False):
-    lecture_path = os.path.dirname(pathname)
-    notebook_name = os.path.basename(pathname)
-
-    with open(pathname, "r", encoding="utf-8") as inp:
-        js = json.load(inp)
-
-    new_js = dict()
-    new_js["cells"] = list()
-    total_i = len(js['cells'])
-
-    for i, cell in enumerate(js['cells']):
-        cell = check_and_fix_source(cell, lecture_path, i, total_i)
-        if cell['cell_type'] == 'markdown':
-            new_cell = fix_markdown_cell(cell)
-        elif cell['cell_type'] == 'code':
-            new_cell = fix_code_cell(cell)
-        elif cell['cell_type'] == 'raw':
-            new_cell = cell
-            print(f"\t[WARNING][Cell:{i + 1}/{total_i}]: Raw cell. Please fix cell type.")
-        else:
-            raise ValueError(f"Notebook broken. Unknown cell type: {cell['cell_type']}")
-
-        new_js["cells"].append(new_cell)
-
-    old_global_meta = fix_markdown_cell({key: value for key, value in js.items() if key != "cells"})  # Fix global meta
-    new_js.update(old_global_meta)
-
-    if ctr.is_changed():
-        save_patch = pathname
-        if backup:
-            backup_patch = os.path.join(lecture_path, notebook_name.split(".")[-2] + "_backup.ipynb")
-            os.replace(pathname, backup_patch)
-
-        with open(save_patch, "w", encoding='utf-8') as out:
-            json.dump(new_js, out, indent=1, ensure_ascii=False)
-            out.write('\n')
-
-
 class Counter(dict):
     def __init__(self):
+        super().__init__()
         self["metadata"] = 0
         self["outputs"] = 0
         self["execution_count"] = 0
@@ -166,7 +132,7 @@ def main():
         lecture_pathname = args.filepath
         print(lecture_pathname)
         ctr.reset()
-        _process_one_lecture(lecture_pathname, backup=args.backup)
+        process_one_lecture(lecture_pathname, backup=args.backup)
         ctr.summary()
         nothing_to_fix = False
 
@@ -179,7 +145,7 @@ def main():
                     lecture_pathname = os.path.join(path, name)
                     print(lecture_pathname)
                     ctr.reset()
-                    _process_one_lecture(lecture_pathname, backup=args.backup)
+                    process_one_lecture(lecture_pathname, backup=args.backup)
                     ctr.summary()
                     nothing_to_fix = False
             if args.root is None:
