@@ -90,7 +90,6 @@ def process_one_lecture(pathname, backup):
     if ctr.is_changed():
         save_path = pathname
         if backup:
-            # wtf = notebook_name.split(".")[-2]
             backup_patch = os.path.join(lecture_path, notebook_name.split(".")[-2] + "_backup.ipynb")
             os.replace(pathname, backup_patch)
         nbformat.validate(new_nb)
