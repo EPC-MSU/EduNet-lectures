@@ -11,9 +11,9 @@ lpattern = re.compile(r"(L\d+)(_\w*)?\.ipynb")  # lecture filename pattern
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--diskpath", help="Path to disk on your computer", default="Z:/")
+parser.add_argument("--diskpath", help="Path to disk on your computer", default="Z:")
 parser.add_argument("--logfile", help="Path to log file", default="links.log")
-parser.add_argument("--repopath", help="Path to repo on disk (from disk root)", default="Data/Sites/edunet.kea.su/repo")
+parser.add_argument("--repopath", help="Path to repo on disk (from disk root)", default="Sites/edunet.kea.su/repo")
 parser.add_argument("--path", help="Path to notebooks with lectures", default="out")
 parser.add_argument("--append", help="Append previous log", default=False, action="store_true")
 
@@ -114,6 +114,10 @@ if __name__ == "__main__":
     CONTENT_DIR_NAME = "EduNet-content"
     DEP_DIR_NAME = "EduNet-web_dependencies"
     REPO_PATH = os.path.join(args.diskpath, args.repopath)
+
+    if not os.path.exists(REPO_PATH):
+        logger.error(f"Path to repo on disk not exists: '{REPO_PATH}'")
+        exit(1)
 
     mode = "a" if args.append else "w"
 
