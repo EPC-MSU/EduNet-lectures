@@ -5,9 +5,9 @@ import logging
 import argparse
 
 
-img_pattern = re.compile(r"^<img(?:\s.*)?\ssrc\s*=\s*\"([^\"]*)\".*>$")  # pattern for image markdown in notebook
-path_pattern = re.compile(r"https://edunet\.kea\.su/repo/(EduNet-(?:(?:content)|(?:web_dependencies))/(L\d+)/.+\..+)")  # pattern for image path
-lpattern = re.compile(r"(L\d+)(_\w*)?\.ipynb")  # lecture filename pattern
+img_pattern = re.compile(r"<img(?:\s.*)?\ssrc\s*=\s*\"([^\"]*)\".*>")  # pattern for image markdown in notebook
+path_pattern = re.compile(r"^https://edunet\.kea\.su/repo/(EduNet-(?:(?:content)|(?:web_dependencies))/(L\d+)/.+\..+)$")  # pattern for image path
+lpattern = re.compile(r"^(L\d+)(_\w*)?\.ipynb$")  # lecture filename pattern
 
 
 parser = argparse.ArgumentParser()
@@ -38,7 +38,7 @@ def get_lecture_links(path):
         if cell["cell_type"] != "markdown":
             continue
         for src in cell["source"]:
-            match = img_pattern.match(src)
+            match = img_pattern.search(src)
             if not match:
                 continue
             link = match.group(1)
