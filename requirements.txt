@@ -5,6 +5,7 @@ torchvision
 torchaudio
 tensorboard
 matplotlib
+nbformat
 
 # Windows only
 # PySoundFile

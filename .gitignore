@@ -11,7 +11,9 @@
 *env
 *venv
 out/*/cleaner.py
+out/cleaner.py
 src/*/cleaner.py
+src/cleaner.py
 run_script.bat
 clean.bat
 
