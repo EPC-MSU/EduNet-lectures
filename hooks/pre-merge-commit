@@ -1,9 +1,0 @@
-#==========BLACK MAGIC ==========
-python cleaner.py --root out
-git add --update
-#================================
-
-. git-sh-setup
-test -x "$GIT_DIR/hooks/pre-commit" &&
-        exec "$GIT_DIR/hooks/pre-commit"
-:
