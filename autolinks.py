@@ -3,6 +3,7 @@ import os
 import re
 import logging
 import argparse
+from fnmatch import fnmatch
 
 
 img_pattern = re.compile(r"<img(?:\s.*)?\ssrc\s*=\s*\"([^\"]*)\".*>")  # pattern for image markdown in notebook
@@ -11,10 +12,13 @@ lpattern = re.compile(r"^(L\d+)(_\w*)?\.ipynb$")  # lecture filename pattern
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--diskpath", help="Path to disk on your computer", default="Z:")
+parser.add_argument("--diskpath",
+                    help="Path to disk on your computer",
+                    default=os.path.join("Z:", "Sites", "edunet.kea.su", "repo"))
+parser.add_argument("--path",
+                    help="Path to notebooks with lectures",
+                    default=os.path.join(".", "out"))
 parser.add_argument("--logfile", help="Path to log file", default="links.log")
-parser.add_argument("--repopath", help="Path to repo on disk (from disk root)", default="Sites/edunet.kea.su/repo")
-parser.add_argument("--path", help="Path to notebooks with lectures", default="out")
 parser.add_argument("--append", help="Append previous log", default=False, action="store_true")
 
 
@@ -55,7 +59,9 @@ def get_disk_links(relpath):
     abspath = os.path.join(REPO_PATH, relpath)
     try:
         for filename in os.listdir(abspath):
-            links.add(os.path.join(relpath, filename))
+            if any([fnmatch(filename, pattern) for pattern in ignore_list]):
+                continue
+            links.add(relpath.replace("\\", "/") + "/" + filename)
     except FileNotFoundError:
         logger.warning(f"Can't get disk links from {abspath}")
     return links
@@ -113,7 +119,7 @@ if __name__ == "__main__":
 
     CONTENT_DIR_NAME = "EduNet-content"
     DEP_DIR_NAME = "EduNet-web_dependencies"
-    REPO_PATH = os.path.join(args.diskpath, args.repopath)
+    REPO_PATH = args.diskpath
 
     if not os.path.exists(REPO_PATH):
         logger.error(f"Path to repo on disk not exists: '{REPO_PATH}'")
@@ -122,6 +128,13 @@ if __name__ == "__main__":
     mode = "a" if args.append else "w"
 
     logger.debug(f"Disk files located in {REPO_PATH}")
+
+    autolinks_ignore_path = os.path.join(os.getcwd(), ".autolinks_ignore")
+    ignore_list = set()
+    if os.path.isfile(autolinks_ignore_path):
+        with open(autolinks_ignore_path) as f:
+            ignore_list |= {line.strip() for line in f.readlines()}
+    print(ignore_list)
 
     with open(args.logfile, mode) as f:
         print("--- Links checker log ---\n", file=f)  # create logfile
