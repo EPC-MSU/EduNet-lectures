@@ -3,3 +3,4 @@
 *.txt
 *.md
 fox.jpg
+imagenet_class_index.json
