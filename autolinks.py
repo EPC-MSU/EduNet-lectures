@@ -88,7 +88,7 @@ def check_lecture(path, lecture_code, logfile):
 
         if ref not in disk_links:
             not_on_disk.add(link)
-        
+
         existing.add(ref)
 
     not_used = set()
