@@ -3,7 +3,12 @@
 #==========BLACK MAGIC ==========
 git diff --staged --name-only |
 while IFS= read -r line; do
-	python cleaner.py --filepath $line
+if ! command -v python &> /dev/null
+then
+    python3 cleaner.py --filepath $line
+else
+    python cleaner.py --filepath $line
+fi
 done
 git add --update $(git diff --staged --name-only)
 #================================
