@@ -1,8 +1,11 @@
 #!/bin/sh
 
 #==========BLACK MAGIC ==========
-python cleaner.py --root out
-git add --update
+git diff --staged --name-only |
+while IFS= read -r line; do
+	python cleaner.py --filepath $line
+done
+git add --update $(git diff --staged --name-only)
 #================================
 
 if git rev-parse --verify HEAD >/dev/null 2>&1
