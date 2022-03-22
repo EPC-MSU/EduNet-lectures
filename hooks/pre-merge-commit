@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#==========BLACK MAGIC ==========
+git diff --staged --name-only |
+while IFS= read -r line; do
+if ! command -v python &> /dev/null
+then
+    python3 cleaner.py --filepath $line
+else
+    python cleaner.py --filepath $line
+fi
+done
+git add --update $(git diff --staged --name-only)
+#================================
+
+. git-sh-setup
+test -x "$GIT_DIR/hooks/pre-commit" &&
+        exec "$GIT_DIR/hooks/pre-commit"
+:
