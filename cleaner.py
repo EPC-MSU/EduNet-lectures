@@ -131,17 +131,14 @@ class Counter(dict):
 
 
 def main():
-    nothing_to_fix = True
-    print('-'*80)
     if args.filepath is not None:
         lecture_pathname = args.filepath
-        print(lecture_pathname)
-        ctr.reset()
-        process_one_lecture(lecture_pathname, backup=args.backup)
-        ctr.summary()
-        nothing_to_fix = False
-
+        if lecture_pathname.endswith('.ipynb'):
+            ctr.reset()
+            process_one_lecture(lecture_pathname, backup=args.backup)
+            ctr.summary()
     else:
+        print('-' * 80)
         for path, subdirs, files in os.walk(args.root if args.root is not None else "."):
             for name in files:
                 if name.endswith('.ipynb') and \
@@ -152,11 +149,8 @@ def main():
                     ctr.reset()
                     process_one_lecture(lecture_pathname, backup=args.backup)
                     ctr.summary()
-                    nothing_to_fix = False
             if args.root is None:
                 break
-    if nothing_to_fix is True:
-        print("Nothing to fix (No one lectures in path)")
 
 
 if __name__ == "__main__":
