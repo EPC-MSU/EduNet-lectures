@@ -86,7 +86,9 @@ def process_one_lecture(pathname, backup):
 
     new_nb = lect_unchanged
     new_nb['cells'] = new_cells
-    new_nb['metadata'] = nbformat.NotebookNode()
+    if new_nb["metadata"] != nbformat.NotebookNode():
+        new_nb["metadata"] = nbformat.NotebookNode()
+        ctr["metadata"] += 1
     if ctr.is_changed():
         save_path = pathname
         if backup:
