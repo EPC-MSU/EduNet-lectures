@@ -19,3 +19,4 @@ clean.bat
 links.log
 autolinks.bat
 autolinks.sh
+out/content/
