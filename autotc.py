@@ -20,7 +20,7 @@ parser.add_argument("--output", help="Output filename", default="temp_Curriculum
 lpattern = re.compile(r"L\d+(_\w*)?\.ipynb")  # filename pattern
 tpattern = re.compile(r".*<.*>(.*)<\/.*>.*")  # title pattern
 hpattern = re.compile(r"#{1,2}\s*([^#\n<>]+)")  # header pattern
-
+cpattern = re.compile(r"```[^`]*?```")        # code pattern in markdown
 
 def analyze_lecture(path):
     with open(path, encoding="utf-8") as f:
@@ -40,7 +40,13 @@ def analyze_lecture(path):
     for v in cells[1:]:
         if v["cell_type"] != "markdown":
             continue
-        for source in v["source"]:
+        
+        # get rid of code in markdown so that we don't grab comments
+        s = "".join(v["source"])
+        s = cpattern.sub("", s) 
+        
+        for source in s.split("\n"):
+            source = cpattern.sub("", source)
             header = hpattern.match(source.strip())
             if not header:
                 continue
