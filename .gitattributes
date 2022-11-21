@@ -6,4 +6,4 @@
 *.bmp filter=lfs diff=lfs merge=lfs -text
 *.pt filter=lfs diff=lfs merge=lfs -texti
 
-.ipynb text
+*.ipynb text
