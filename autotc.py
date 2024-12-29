@@ -29,7 +29,7 @@ def analyze_lecture(path):
     if not cells:
         logger.warning(f"File '{fname}' incorrect")
         return
-    title_src = "".join(cells[0]["source"])
+    title_src = "".join(cells[1]["source"])
     title = tpattern.match(title_src)
     if not title:
         title = os.path.basename(path)
@@ -37,7 +37,7 @@ def analyze_lecture(path):
     else:
         title = title.group(1).strip()
     headers = []
-    for v in cells[1:]:
+    for v in cells[2:]:
         if v["cell_type"] != "markdown":
             continue
         
