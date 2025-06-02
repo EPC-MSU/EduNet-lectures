@@ -38,7 +38,7 @@
 
 ## Лекция 10 “Трансформеры”
 
-Классический seq2seq. Cross-Attention. RNN + Cross-Attention. Разновидности функций сходства. Self-Attention. Архитектура сети Transformer. Кодировщик. Подготовка данных. Hugging Face. BERT. Декодировщик. GPT. Методы Генерации текста. Файнтюнинг. Большие языковые модели (LLM). LLaMA. LoRa. DeepSpeed. NLP метрики. BERTScore. Self Attention (ViT 2020). Архитектура ViT. Предсказание с помощью ViT. DeiT: Data-efficient Image Transformers. Использование ViT с собственным датасетом
+Классический seq2seq. Cross-Attention. RNN + Cross-Attention. Архитектура сети Transformer. Self-Attention. Кодировщик. Алгоритм. Hugging Face. BERT. Декодировщик. Masked Self-Attention Layer. GPT. Методы генерации текста. Файнтюнинг. Большие языковые модели (LLM). LLaMA. NLP и обучение с подкреплением (RLHF). Метод адаптации LoRa. DeepSpeed. NLP метрики. BERTScore. Self Attention (ViT 2020). Архитектура ViT. Предсказание с помощью ViT. DeiT: Data-efficient Image Transformers. Использование ViT с собственным датасетом
 
 ## Лекция 11 “Сегментация и детектирование”
 
